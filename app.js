@@ -1,6 +1,12 @@
 const express = require('express')
 const app = express();
 
+
+
+//activate json, by default he's not activated.
+app.use(express.json()); //piece of middleware.
+
+//our courses array. instead of databases.
 const courses = [
     {id:1, name: 'JavaScript'},
     {id:2, name: 'Php'},
@@ -26,8 +32,13 @@ app.get('/api/courses/:id', (req, res) => {
 
 //Http post request
 app.post('/api/courses', (req, res) => {
-
-})
+    const course = {
+        id: courses.length + 1,
+        name: req.body.name
+    };                                          //with postman...
+    courses.push(course);
+    res.send(course);
+});
 
 
 //Ports
