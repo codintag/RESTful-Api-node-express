@@ -28,23 +28,15 @@ app.get('/api/courses', (req, res) => {
 //Http get request
 app.get('/api/courses/:id', (req, res) => {
     const course = courses.find( c => c.id === parseInt(req.params.id));
-    if(!course) res.status(404).send('The course with the given id is not found!');
+    if(!course) return res.status(404).send('The course with the given id is not found!');
     res.send(course);
 });
 
 //Http post request
 app.post('/api/courses', (req, res) => {
-    const schema = {
-        name:Joi.string().min(3).required()
-    };
+   const { error } = validateCourse(req.body); //result.error
 
-    Joi.validate(req.body, schema);
-
-    if(!req.body.name || req.body.name.length < 3){
-        //400 Bad request
-        rest.status(400).send('Name is required and should be minimum 3 characters.');
-        return;
-    }
+   if(error) return res.status(400).send(result.error.details[0].message);  //400 Bad request 
 
     const course = {
         id: courses.length + 1,
@@ -53,6 +45,42 @@ app.post('/api/courses', (req, res) => {
     courses.push(course);
     res.send(course);
 });
+
+//uptade request
+app.put('/api/courses/:id', (req, res) => {
+    const course = courses.find( c => c.id === parseInt(req.params.id));
+    if(!course) return res.status(404).send('The course with the given id is not found!');
+
+    const { error } = validateCourse(req.body); //result.error
+
+    if (error) return res.status(400).send(error.details[0].message); //400 Bad request
+
+
+    course.name = req.body.name;
+    res.send(course);
+
+});
+
+
+//delete request
+app.delete('/api/courses/:id', (req, res) => {
+    const course = courses.find( c => c.id === parseInt(req.params.id));
+    if(!course) return res.status(404).send('The course with the given id is not found!');
+
+  const index = courses.indexOf(course);
+  courses.splice(index, 1);
+
+  res.send(course);
+});
+
+
+function validateCourse(course) {
+    const schema = {
+        name:Joi.string().min(3).required()
+    };
+
+    return Joi.validate(course, schema);
+}
 
 
 //Ports
